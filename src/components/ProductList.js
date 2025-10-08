@@ -1,69 +1,55 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import API from "../api";
 
-export default function ProductList({ products }) {
-  if (!products?.length) {
-    return <p style={{ textAlign: "center", marginTop: 20 }}>No products yet.</p>;
+export default function ProductList({ products, onDelete }) {
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await API.delete(`/api/products/${id}/`);
+        onDelete();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete product.");
+      }
+    }
+  };
+
+  if (!products || products.length === 0) {
+    return <p className="text-gray-500 text-center mt-6">No products yet.</p>;
   }
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-        gap: 16,
-        marginTop: 16,
-      }}
-    >
+    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-6">
       {products.map((p) => (
         <div
           key={p.id}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: 10,
-            padding: 12,
-            background: "#fff",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-          }}
+          className="bg-white shadow-sm rounded-xl overflow-hidden hover:shadow-md transition max-w-xs mx-auto"
         >
-          <div
-            style={{
-              height: 160,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "#fafafa",
-              marginBottom: 10,
-              borderRadius: 6,
-              overflow: "hidden",
-            }}
-          >
-            {p.image_url ? (
-              <img
-                src={p.image_url}
-                alt={p.name}
-                style={{ maxWidth: "100%", maxHeight: "100%" }}
-              />
-            ) : (
-              <span style={{ opacity: 0.5 }}>No image</span>
-            )}
-          </div>
+          <img
+            src={p.image || "https://via.placeholder.com/150"}
+            alt={p.name}
+            className="w-full h-32 object-cover"
+          />
+          <div className="p-4">
+            <h3 className="text-sm font-semibold text-gray-800 truncate">{p.name}</h3>
+            <p className="text-gray-500 text-xs mt-1 line-clamp-2">{p.description}</p>
+            <p className="font-bold text-blue-600 mt-2 text-sm">₹{p.price}</p>
 
-          <h4 style={{ margin: "6px 0", fontSize: 16 }}>{p.name}</h4>
-          <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 8 }}>
-            {p.description || "—"}
-          </p>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ fontWeight: 700, color: "#333" }}>₹ {p.price}</div>
-            {/* Placeholder for future buttons (edit/delete) */}
+            <div className="flex justify-between mt-3">
+              <Link
+                to={`/products/${p.id}/edit`}
+                className="text-xs bg-yellow-400 px-3 py-1 rounded-md hover:bg-yellow-500 transition"
+              >
+                Edit
+              </Link>
+              <button
+                onClick={() => handleDelete(p.id)}
+                className="text-xs bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       ))}
