@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAu
 from rest_framework.response import Response
 from .models import Product
 from .serializers import ProductSerializer, SignupSerializer
+from rest_framework import generics
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by("-created_at")
@@ -55,3 +56,11 @@ def product_detail(request, pk):
     elif request.method == 'DELETE':
         product.delete()
         return Response({'message': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+class ProductUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
